@@ -1,0 +1,388 @@
+/* =========================================
+   1. HÌNH NỀN ĐỘNG TOÀN MÀN HÌNH (ANIMATED BACKGROUND)
+   ========================================= */
+   html {
+    min-height: 100%;
+    /* Dải màu chuyển động: Xanh lơ - Xanh dương - Hồng - Cam */
+    background: linear-gradient(-45deg, #4facfe, #00f2fe, #f093fb, #f5576c);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite; /* Hiệu ứng chạy lặp lại vô tận trong 15 giây */
+}
+
+/* Khai báo chuyển động cho hình nền */
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* =========================================
+   2. CÀI ĐẶT CƠ BẢN & HIỆU ỨNG KÍNH MỜ
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+    /* Biến toàn bộ khung body thành một tấm kính mờ (Glassmorphism) */
+    background: rgba(255, 255, 255, 0.4); /* Nền trắng trong suốt 40% */
+    backdrop-filter: blur(12px); /* Làm mờ cảnh nền chạy phía sau */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6); /* Viền kính sáng nhẹ */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    border-radius: 15px; /* Bo góc khối kính */
+    
+    color: #333;
+    max-width: 1000px;
+    margin: 50px auto; 
+    padding: 30px;
+}
+
+h1 {
+    color: #111;
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8); /* Chữ có bóng trắng nhẹ để nổi bật trên kính */
+}
+
+/* =========================================
+   3. NÚT THÊM SẢN PHẨM
+   ========================================= */
+.btn-add {
+    display: inline-block;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-add:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px); /* Nổi nhẹ lên khi di chuột */
+}
+
+/* =========================================
+   4. DANH SÁCH & THẺ SẢN PHẨM (CARD)
+   ========================================= */
+ul {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+li {
+    background-color: rgba(255, 255, 255, 0.95); /* Thẻ sản phẩm có màu trắng đục 95% để chữ dễ đọc */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border-top: 4px solid #3498db;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+li:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+}
+
+li h2 {
+    font-size: 1.25rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+li p {
+    color: #555;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+/* Màu đỏ nổi bật cho Giá tiền */
+li p:nth-of-type(2) {
+    font-weight: bold;
+    color: #e74c3c;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* =========================================
+   5. KHU VỰC NÚT SỬA / XÓA
+   ========================================= */
+.actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.actions a {
+    display: block;
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 5px;
+    color: white;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.actions a { background-color: #f39c12; }
+.actions a:hover { background-color: #e67e22; filter: brightness(1.1); }
+
+.actions a[onclick] { background-color: #e74c3c; }
+.actions a[onclick]:hover { background-color: #c0392b; filter: brightness(1.1); }
+
+/* =========================================
+   6. LÀM ĐẸP FORM (Thêm & Sửa)
+   ========================================= */
+   form {
+    margin-top: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2c3e50;
+    font-size: 15px;
+}
+
+/* Các ô nhập liệu kết hợp hiệu ứng kính trong suốt */
+input[type="text"],
+input[type="number"],
+textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    background-color: rgba(255, 255, 255, 0.6); /* Nền hơi trong suốt */
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    color: #333;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* Hiệu ứng khi nhấp chuột vào ô nhập liệu */
+input:focus, 
+textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Nút Submit (Lưu / Thêm) - Dùng Gradient cho xịn */
+.btn-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    filter: brightness(1.1);
+}
+
+/* Nút quay lại dạng text đơn giản */
+.back-link {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.back-link a {
+    background: transparent;
+    color: #555;
+    text-decoration: underline;
+    box-shadow: none;
+    padding: 0;
+}
+
+.back-link a:hover {
+    background: transparent;
+    color: #111;
+    transform: none;
+}
+
+/* =========================================
+   7. CHỈNH LẠI CÁCH HIỂN THỊ LỖI
+   ========================================= */
+.error-message {
+    background-color: rgba(255, 99, 71, 0.2);
+    border-left: 5px solid #e74c3c;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 25px;
+}
+
+.error-message ul {
+    display: block; /* Hủy dạng grid của danh sách sản phẩm */
+    margin-left: 20px;
+    list-style-type: disc;
+}
+
+.error-message li {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 3px 0;
+    color: #c0392b;
+    font-weight: bold;
+}
+
+.error-message li:hover {
+    transform: none;
+    box-shadow: none;
+}
+/* =========================================
+   THIẾT KẾ RIÊNG CHO CỬA HÀNG (SNEAKER ZONE)
+   ========================================= */
+
+/* Khu vực Logo / Tiêu đề */
+.store-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+.store-header h1 {
+    font-size: 2.5rem;
+    color: #111;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.store-header p {
+    color: #444;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* =========================================
+   4. DANH SÁCH & THẺ SẢN PHẨM BÁN HÀNG
+   ========================================= */
+ul {
+    list-style-type: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+/* Định dạng lại Card Sản Phẩm */
+li {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px; /* Bo góc to hơn */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden; /* Cực kỳ quan trọng: Giúp ảnh bên trong không bị tràn ra khỏi góc bo tròn */
+}
+
+li:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+/* Khối Ảnh Sản Phẩm */
+.product-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover; /* Cắt ảnh vừa vặn khung hình */
+    border-bottom: 1px solid #eee;
+}
+
+/* Khối thông tin (Tên, Giá, Nút) */
+.product-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Đẩy khu vực nút bấm luôn nằm dưới đáy */
+}
+
+.product-info h2 {
+    font-size: 1.3rem;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.product-info .desc {
+    color: #666;
+    font-size: 0.95rem;
+    margin-bottom: 15px;
+    line-height: 1.5;
+    /* Cắt bớt chữ nếu mô tả quá dài */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Giá tiền chuẩn E-commerce */
+.product-info .price {
+    font-weight: 800;
+    color: #e74c3c;
+    font-size: 1.4rem;
+    margin-bottom: 25px;
+}
+
+/* =========================================
+   5. KHU VỰC NÚT SỬA / XÓA
+   ========================================= */
+.actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.actions a {
+    display: block;
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 8px;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.actions a { background-color: #34495e; } /* Đổi nút Sửa thành màu tối sang trọng */
+.actions a:hover { background-color: #2c3e50; }
+
+.actions a[onclick] { background-color: #e74c3c; }
+.actions a[onclick]:hover { background-color: #c0392b; }
