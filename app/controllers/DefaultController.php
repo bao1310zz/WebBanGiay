@@ -1,8 +1,7 @@
 <?php
-class DefaultController
-{
-    public function index()
-    {
-        echo "HELLO HUTECH ";
+class DefaultController {
+    public function index() {
+        header('Location: /WebBanGiay/Product');
     }
 }
+?>

@@ -1,111 +1,92 @@
 <?php
-require_once 'app/models/ProductModel.php';
-class ProductController
-{
-    private $products = [];
-    public function __construct()
-    {
-        // Giả sử chúng ta lưu trữ sản phẩm trong session để giữ lại khi làm mới trang
-        session_start();
-        if (isset($_SESSION['products'])) {
-            $this->products = $_SESSION['products'];
-        }
+class ProductController {
+    private $productModel;
+    private $db;
+
+    public function __construct() {
+        $this->db = (new Database())->getConnection();
+        $this->productModel = new ProductModel($this->db);
     }
-    public function index()
-    {
-        $this->list();
-    }
-    public function list()
-    {
-        // Hiển thị danh sách sản phẩm
-        $products = $this->products;
+
+    public function index() {
+        $products = $this->productModel->getProducts();
         include 'app/views/product/list.php';
     }
-    public function add()
-    {
-        $errors = [];
+
+    public function add() {
+        $categories = (new CategoryModel($this->db))->getCategories();
+        include 'app/views/product/add.php';
+    }
+
+    public function save() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $name = $_POST['name'] ?? '';
+            $description = $_POST['description'] ?? '';
+            $price = $_POST['price'] ?? 0;
+            $category_id = $_POST['category_id'] ?? null;
+            
+            $image = "";
+            if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+                $target_dir = "public/uploads/";
+                $image = time() . "_" . basename($_FILES["image"]["name"]);
+                move_uploaded_file($_FILES["image"]["tmp_name"], $target_dir . $image);
+            }
+
+            if ($this->productModel->addProduct($name, $description, $price, $category_id, $image)) {
+                header('Location: /WebBanGiay/Product');
+            } else {
+                echo "Lỗi khi thêm sản phẩm!";
+            }
+        }
+    }
+
+    public function edit($id) {
+        $product = $this->productModel->getProductById($id);
+        $categories = (new CategoryModel($this->db))->getCategories();
+        if ($product) {
+            include 'app/views/product/edit.php';
+        } else {
+            echo "Không tìm thấy sản phẩm.";
+        }
+    }
+
+    public function update() {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $id = $_POST['id'];
             $name = $_POST['name'];
             $description = $_POST['description'];
             $price = $_POST['price'];
+            $category_id = $_POST['category_id'];
             
-            // Xử lý upload ảnh
-            $imagePath = 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80'; // Ảnh mặc định nếu không chọn
+            $image = "";
             if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-                $uploadDir = 'public/images/';
-                if (!is_dir($uploadDir)) { mkdir($uploadDir, 0777, true); } // Tự tạo thư mục nếu chưa có
-                
-                // Đổi tên file để không bị trùng
-                $fileName = time() . '_' . basename($_FILES["image"]["name"]);
-                $targetFilePath = $uploadDir . $fileName;
-                
-                if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
-                    $imagePath = '/' . $targetFilePath;
-                }
+                $target_dir = "public/uploads/";
+                $image = time() . "_" . basename($_FILES["image"]["name"]);
+                move_uploaded_file($_FILES["image"]["tmp_name"], $target_dir . $image);
             }
 
-            if (empty($name)) { $errors[] = 'Tên sản phẩm là bắt buộc.'; } 
-            elseif (strlen($name) < 5 || strlen($name) > 100) { $errors[] = 'Tên sản phẩm phải từ 5-100 ký tự.'; }
-            if (!is_numeric($price) || $price <= 0) { $errors[] = 'Giá phải là số dương.'; }
-
-            if (empty($errors)) {
-                $id = count($this->products) + 1;
-                // Truyền thêm biến $imagePath vào đây
-                $product = new ProductModel($id, $name, $description, $price, $imagePath);
-                $this->products[] = $product;
-                $_SESSION['products'] = $this->products;
-                header('Location: /project1/Product/list');
-                exit();
+            if ($this->productModel->updateProduct($id, $name, $description, $price, $category_id, $image)) {
+                header('Location: /WebBanGiay/Product');
+            } else {
+                echo "Lỗi khi cập nhật sản phẩm.";
             }
         }
-        include 'app/views/product/add.php';
     }
-    public function edit($id)
-    {
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            foreach ($this->products as $key => $product) {
-                if ($product->getID() == $id) {
-                    $this->products[$key]->setName($_POST['name']);
-                    $this->products[$key]->setDescription($_POST['description']);
-                    $this->products[$key]->setPrice($_POST['price']);
-
-                    // Kiểm tra xem có upload ảnh mới không
-                    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-                        $uploadDir = 'public/images/';
-                        if (!is_dir($uploadDir)) { mkdir($uploadDir, 0777, true); }
-                        $fileName = time() . '_' . basename($_FILES["image"]["name"]);
-                        $targetFilePath = $uploadDir . $fileName;
-                        
-                        if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFilePath)) {
-                            $this->products[$key]->setImage('/' . $targetFilePath);
-                        }
-                    }
-                    break;
-                }
-            }
-            $_SESSION['products'] = $this->products;
-            header('Location: /project1/Product/list');
-            exit();
+    public function show($id) {
+        $product = $this->productModel->getProductById($id);
+        if ($product) {
+            include 'app/views/product/show.php';
+        } else {
+            echo "Không tìm thấy sản phẩm.";
         }
-        foreach ($this->products as $product) {
-            if ($product->getID() == $id) {
-                include 'app/views/product/edit.php';
-                return;
-            }
-        }
-        die('Product not found');
     }
-    public function delete($id)
-    {
-        foreach ($this->products as $key => $product) {
-            if ($product->getID() == $id) {
-                unset($this->products[$key]);
-                break;
-            }
+
+    public function delete($id) {
+        if ($this->productModel->deleteProduct($id)) {
+            header('Location: /WebBanGiay/Product');
+        } else {
+            echo "Lỗi khi xóa.";
         }
-        $this->products = array_values($this->products);
-        $_SESSION['products'] = $this->products;
-        header('Location: /project1/Product/list');
-        exit();
     }
 }
+?>

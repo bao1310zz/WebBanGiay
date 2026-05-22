@@ -1,66 +1,64 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Thêm sản phẩm mới</title>
-    <link rel="stylesheet" href="/project1/public/css/style.css">
-    <script>
-        function validateForm() {
-            let name = document.getElementById('name').value;
-            let price = document.getElementById('price').value;
-            let errors = [];
-            if (name.length < 10 || name.length > 100) {
-                errors.push('Tên sản phẩm phải có từ 10 đến 100 ký tự.');
-            }
-            if (price <= 0 || isNaN(price)) {
-                errors.push('Giá phải là một số dương lớn hơn 0.');
-            }
-            if (errors.length > 0) {
-                alert(errors.join('\n'));
-                return false;
-            }
-            return true;
-        }
-    </script>
-</head>
-<body>
-    <h1>Thêm sản phẩm mới</h1>
-    
-    <?php if (!empty($errors)): ?>
-        <div class="error-message">
-            <ul>
-                <?php foreach ($errors as $error): ?>
-                    <li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-    <?php endif; ?>
+<?php include 'app/views/shares/header.php'; ?>
 
-    <form method="POST" action="/project1/Product/add" enctype="multipart/form-data" onsubmit="return validateForm();">
-        <div class="form-group">
-            <label for="name">Tên sản phẩm:</label>
-            <input type="text" id="name" name="name" required>
+<div class="container my-5" style="min-height: 60vh;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="custom-card">
+                <div class="text-center mb-5">
+                    <h3 class="font-weight-bold text-uppercase" style="letter-spacing: 2px;">Thêm Sản Phẩm Mới</h3>
+                    <div style="height: 2px; width: 50px; background-color: #c89b3c; margin: 15px auto 0;"></div>
+                </div>
+
+                <form method="POST" action="/WebBanGiay/Product/save" enctype="multipart/form-data">
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-uppercase small text-muted">Tên giày</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="font-weight-bold text-uppercase small text-muted">Mô tả chi tiết</label>
+                        <textarea name="description" class="form-control" rows="4" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group mb-4">
+                            <label class="font-weight-bold text-uppercase small text-muted">Giá bán (VNĐ)</label>
+                            <input type="number" name="price" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 form-group mb-4">
+                            <label class="font-weight-bold text-uppercase small text-muted">Danh mục</label>
+                            <select name="category_id" class="form-control custom-select" style="height: auto;" required>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat->id ?>"><?= $cat->name ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-5">
+                        <label class="font-weight-bold text-uppercase small text-muted d-block">Hình ảnh</label>
+                        <div class="custom-file">
+                            <input type="file" name="image" class="custom-file-input" id="imageFile" required>
+                            <label class="custom-file-label rounded-0" for="imageFile">Chọn tệp ảnh...</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between border-top pt-4">
+                        <a href="/WebBanGiay/Product" class="btn btn-outline-dark px-4 py-2 rounded-0">Quay lại</a>
+                        <button type="submit" class="btn btn-gold px-5 py-2">Lưu Sản Phẩm</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        <div class="form-group">
-            <label for="description">Mô tả:</label>
-            <textarea id="description" name="description" required></textarea>
-        </div>
-        
-        <div class="form-group">
-            <label for="price">Giá:</label>
-            <input type="number" id="price" name="price" step="0.01" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="image">Hình ảnh sản phẩm:</label>
-            <input type="file" id="image" name="image" accept="image/*" style="background: none; border: none; padding: 0; box-shadow: none;">
-        </div>
-        
-        <button type="submit" class="btn-submit">Thêm sản phẩm</button>
-    </form>
-    
-    <div class="back-link">
-        <a href="/project1/Product/list">Quay lại danh sách sản phẩm</a>
     </div>
-</body>
-</html>
+</div>
+
+<script>
+document.querySelector('.custom-file-input').addEventListener('change',function(e){
+  var fileName = document.getElementById("imageFile").files[0].name;
+  var nextSibling = e.target.nextElementSibling;
+  nextSibling.innerText = fileName;
+})
+</script>
+
+<?php include 'app/views/shares/footer.php'; ?>

@@ -1,63 +1,66 @@
 <?php
-class ProductModel
-{
-    // Thuộc tính của lớp ProductModel
-    private $ID;
-    private $Name;
-    private $Description;
-    private $Price;
-    private $image;
-    // Constructor để khởi tạo đối tượng ProductModel
-    public function __construct($ID, $Name, $Description, $Price, $image)
-    {
-        $this->ID = $ID;
-        $this->Name = $Name;
-        $this->Description = $Description;
-        $this->Price = $Price;
-        $this->image = $image;
+class ProductModel {
+    private $conn;
+    private $table_name = "product";
+
+    public function __construct($db) {
+        $this->conn = $db;
     }
-    // Getter và Setter cho thuộc tính ID
-    public function getID()
-    {
-        return $this->ID;
+
+    public function getProducts() {
+        $query = "SELECT p.*, c.name as category_name FROM " . $this->table_name . " p LEFT JOIN category c ON p.category_id = c.id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
-    public function setID($ID)
-    {
-        $this->ID = $ID;
+
+    public function getProductById($id) {
+        // Đã thêm LEFT JOIN để lấy ra category_name
+        $query = "SELECT p.*, c.name as category_name 
+                  FROM " . $this->table_name . " p 
+                  LEFT JOIN category c ON p.category_id = c.id 
+                  WHERE p.id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_OBJ);
     }
-    // Getter và Setter cho thuộc tính Name
-    public function getName()
-    {
-        return $this->Name;
+
+    public function addProduct($name, $description, $price, $category_id, $image) {
+        $query = "INSERT INTO " . $this->table_name . " (name, description, price, category_id, image) VALUES (:name, :description, :price, :category_id, :image)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':price', $price);
+        $stmt->bindParam(':category_id', $category_id);
+        $stmt->bindParam(':image', $image);
+        return $stmt->execute();
     }
-    public function setName($Name)
-    {
-        $this->Name = $Name;
+
+    public function updateProduct($id, $name, $description, $price, $category_id, $image) {
+        if (!empty($image)) {
+            $query = "UPDATE " . $this->table_name . " SET name=:name, description=:description, price=:price, category_id=:category_id, image=:image WHERE id=:id";
+        } else {
+            // Cập nhật không đổi ảnh
+            $query = "UPDATE " . $this->table_name . " SET name=:name, description=:description, price=:price, category_id=:category_id WHERE id=:id";
+        }
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':price', $price);
+        $stmt->bindParam(':category_id', $category_id);
+        if (!empty($image)) {
+            $stmt->bindParam(':image', $image);
+        }
+        return $stmt->execute();
     }
-    // Getter và Setter cho thuộc tính Description
-    public function getDescription()
-    {
-        return $this->Description;
-    }
-    public function setDescription($Description)
-    {
-        $this->Description = $Description;
-    }
-    // Getter và Setter cho thuộc tính Price
-    public function getPrice()
-    {
-        return $this->Price;
-    }
-    public function setPrice($Price)
-    {
-        $this->Price = $Price;
-    }
-    public function getImage()
-    {
-        return $this->image;
-    }
-    public function setImage($image)
-    {
-        $this->image = $image;
+
+    public function deleteProduct($id) {
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        return $stmt->execute();
     }
 }
+?>
