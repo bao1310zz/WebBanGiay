@@ -42,5 +42,44 @@
             offset: 50 /* Bắt đầu chạy khi đối tượng cách đáy màn hình 50px */
         });
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.ajax-cart-form');
+    
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Tuyệt chiêu khóa đứng màn hình, không cho reload
+
+            const formData = new FormData(this);
+            const url = this.getAttribute('action');
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    // 1. Tự động cập nhật con số trên icon Giỏ hàng ở Header
+                    const badge = document.querySelector('.badge-warning');
+                    if (badge) badge.innerText = data.cart_count;
+
+                    // 2. Bắn thông báo cực xịn bằng SweetAlert (hiện ở góc phải màn hình)
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Đã thêm sản phẩm vào giỏ!',
+                        showConfirmButton: false,
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
+                }
+            })
+            .catch(error => console.error('Lỗi AJAX:', error));
+        });
+    });
+});
+</script>
 </body>
 </html>

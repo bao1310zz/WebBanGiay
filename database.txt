@@ -1,0 +1,70 @@
+-- Tạo database nếu chưa có và sử dụng nó
+CREATE DATABASE IF NOT EXISTS webbangiay;
+USE webbangiay;
+
+-- Xóa các bảng cũ nếu có (xóa bảng con trước, bảng cha sau để không lỗi khóa ngoại)
+DROP TABLE IF EXISTS order_details;
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS product;
+DROP TABLE IF EXISTS category;
+
+-- ==========================================
+-- 1. TẠO BẢNG DANH MỤC (category)
+-- ==========================================
+CREATE TABLE category (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT
+);
+
+-- ==========================================
+-- 2. TẠO BẢNG SẢN PHẨM (product)
+-- ==========================================
+CREATE TABLE product (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    price INT NOT NULL,
+    category_id INT,
+    image VARCHAR(255),
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE
+);
+
+-- ==========================================
+-- 3. TẠO BẢNG ĐƠN HÀNG (orders)
+-- ==========================================
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    address TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ==========================================
+-- 4. TẠO BẢNG CHI TIẾT ĐƠN HÀNG (order_details)
+-- ==========================================
+CREATE TABLE order_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
+
+-- ==========================================
+-- 5. THÊM DỮ LIỆU MẪU ĐỂ TEST
+-- ==========================================
+INSERT INTO category (name, description) VALUES 
+('Sneaker', 'Giày thể thao năng động, trẻ trung'),
+('Oxford', 'Giày tây nam sang trọng, lịch lãm'),
+('Loafer', 'Giày lười tiện dụng, thoải mái'),
+('Boots', 'Giày cao cổ cá tính, mạnh mẽ');
+
+-- (Lưu ý: Cột image tạm để trống, bạn có thể vào web dùng chức năng Sửa để up lại ảnh thật nhé)
+INSERT INTO product (name, description, price, category_id, image) VALUES 
+('Sneaker HUTECH', 'Mẫu giày thể thao phiên bản giới hạn, chất liệu thoáng khí.', 850000, 1, ''),
+('Oxford Cổ Điển', 'Được chế tác từ da bò nguyên tấm, thích hợp cho sự kiện trang trọng.', 1500000, 2, ''),
+('Loafer Da Sáp', 'Đế cao su êm ái, phù hợp mang đi làm hoặc dạo phố.', 1200000, 3, ''),
+('Chelsea Boots Đen', 'Kiểu dáng mạnh mẽ, dễ dàng phối với quần Jeans.', 1800000, 4, '');

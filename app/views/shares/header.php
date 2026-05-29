@@ -13,6 +13,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Dành cho Firefox */
+        }
         body { font-family: 'Montserrat', sans-serif; background-color: #fdfdfd; color: #111; overflow-x: hidden; }
         
         /* Menu Kính mờ (Glassmorphism) */
@@ -72,7 +80,7 @@
                     <li class="nav-item"><a class="nav-link" href="/WebBanGiay/Home">Cửa Hàng</a></li>
                     
                     <li class="nav-item">
-                        <a class="nav-link" href="/WebBanGiay/Cart">
+                        <a class="nav-link" href="/WebBanGiay/Product/cart">
                             <i class="fas fa-shopping-bag mr-1"></i> Giỏ Hàng 
                             <span class="badge badge-warning text-dark ml-1 rounded-circle">
                                 <?= isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0 ?>

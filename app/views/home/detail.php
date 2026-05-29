@@ -30,7 +30,7 @@
                 <li class="mb-2"><i class="fas fa-check text-success mr-2"></i> Đổi trả miễn phí 7 ngày</li>
             </ul>
 
-            <a href="/WebBanGiay/Cart/add/<?= $product->id ?>" class="btn btn-gold btn-lg text-uppercase" style="letter-spacing: 2px;">
+            <a href="/WebBanGiay/Product/addToCart/<?= $product->id ?>" class="btn btn-gold btn-lg text-uppercase" style="letter-spacing: 2px;">
                 <i class="fas fa-shopping-bag mr-2"></i> Thêm Vào Giỏ Hàng
             </a>
         </div>
