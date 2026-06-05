@@ -1,4 +1,7 @@
 <?php
+require_once 'app/config/database.php';
+require_once 'app/models/ProductModel.php';
+require_once 'app/models/CategoryModel.php';
 class HomeController {
     private $productModel;
     private $db;

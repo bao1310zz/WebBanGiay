@@ -1,4 +1,8 @@
 <?php
+require_once 'app/config/database.php';
+require_once 'app/models/ProductModel.php';
+require_once 'app/models/CategoryModel.php';
+require_once 'app/helpers/SessionHelper.php';
 class ProductController {
     private $productModel;
     private $db;
@@ -12,13 +16,25 @@ class ProductController {
         $products = $this->productModel->getProducts();
         include 'app/views/product/list.php';
     }
-
+// Hàm nội bộ dùng để đá những ai không phải Admin ra ngoài
+    private function checkAdminAccess() {
+        if (!SessionHelper::isAdmin()) {
+            echo "<div style='background: #111; color: #fff; text-align: center; padding: 50px; height: 100vh; font-family: sans-serif;'>";
+            echo "<h1 style='color: #dc3545;'><i class='fas fa-exclamation-triangle'></i> TRUY CẬP BỊ TỪ CHỐI</h1>";
+            echo "<p style='color: #aaa;'>Bạn không có quyền hạn quản trị để thực hiện hành động này.</p>";
+            echo "<a href='/WebBanGiay/Product' style='color: #c89b3c; text-decoration: none; font-weight: bold;'>Quay lại Cửa hàng</a>";
+            echo "</div>";
+            exit();
+        }
+    }
     public function add() {
+        $this->checkAdminAccess();
         $categories = (new CategoryModel($this->db))->getCategories();
         include 'app/views/product/add.php';
     }
 
     public function save() {
+        $this->checkAdminAccess();
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $name = $_POST['name'] ?? '';
             $description = $_POST['description'] ?? '';
@@ -41,6 +57,7 @@ class ProductController {
     }
 
     public function edit($id) {
+        $this->checkAdminAccess();
         $product = $this->productModel->getProductById($id);
         $categories = (new CategoryModel($this->db))->getCategories();
         if ($product) {
@@ -51,6 +68,7 @@ class ProductController {
     }
 
     public function update() {
+        $this->checkAdminAccess();
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $id = $_POST['id'];
             $name = $_POST['name'];
@@ -83,6 +101,7 @@ class ProductController {
     }
 
     public function delete($id) {
+        $this->checkAdminAccess();
         if ($this->productModel->deleteProduct($id)) {
             header('Location: /WebBanGiay/Product');
         } else {
@@ -105,51 +124,53 @@ class ProductController {
     }
 
     public function addToCart($id) {
-        $product = $this->productModel->getProductById($id);
-        if (!$product) {
-            echo json_encode(['status' => 'error', 'message' => 'Không tìm thấy sản phẩm']);
-            return;
-        }
-
-        if (!isset($_SESSION['cart'])) {
-            $_SESSION['cart'] = [];
-        }
-
-        if (isset($_SESSION['cart'][$id]) && !is_array($_SESSION['cart'][$id])) {
-            unset($_SESSION['cart'][$id]);
-        }
-
-        $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
-        if ($quantity < 1) $quantity = 1; 
-
-        if (isset($_SESSION['cart'][$id])) {
-            $_SESSION['cart'][$id]['quantity'] += $quantity;
-        } else {
-            $_SESSION['cart'][$id] = [
-                'name' => $product->name,
-                'price' => $product->price,
-                'quantity' => $quantity,
-                'image' => $product->image
-            ];
-        }
-
-        // ĐẾM SỐ LƯỢNG MÓN HÀNG TRONG GIỎ
-        $cart_count = count($_SESSION['cart']);
-
-        // NẾU CÓ CỜ 'AJAX' GỬI LÊN THÌ TRẢ VỀ JSON KHÔNG RELOAD TRANG
-        if (isset($_POST['is_ajax'])) {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'status' => 'success', 
-                'cart_count' => $cart_count
-            ]);
-            exit; // Dừng luôn tại đây, không chạy hàm header Location ở dưới nữa
-        }
-
-        // Dự phòng cho trường hợp không dùng AJAX (chạy bình thường)
-        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '/WebBanGiay/Home';
-        header('Location: ' . $referer);
+    // 1. Lấy thông tin sản phẩm
+    $product = $this->productModel->getProductById($id);
+    if (!$product) {
+        echo json_encode(['status' => 'error', 'message' => 'Sản phẩm không tồn tại']);
+        return;
     }
+
+    $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+
+    // 2. Khởi tạo Session giỏ hàng
+    if (!isset($_SESSION['cart'])) {
+        $_SESSION['cart'] = [];
+    }
+
+    // 3. Xử lý logic lưu trữ
+    if (isset($_SESSION['cart'][$id])) {
+        // Nếu đã có, chỉ cộng số lượng
+        $_SESSION['cart'][$id]['quantity'] += $quantity;
+    } else {
+        // Nếu chưa có, thêm mới (Lưu ý: $id làm Key của mảng)
+        $_SESSION['cart'][$id] = [
+            'name' => $product->name,
+            'price' => $product->price,
+            'quantity' => $quantity,
+            'image' => $product->image
+        ];
+    }
+
+    // 4. CHỖ NÀY LÀ MẤU CHỐT: Đếm số loại sản phẩm (số phần tử của mảng)
+    // Dùng count() thay vì vòng lặp cộng dồn quantity
+    $cart_count = count($_SESSION['cart']);
+
+    // 5. Trả về kết quả cho AJAX
+    if (isset($_POST['is_ajax']) && $_POST['is_ajax'] == 1) {
+        header('Content-Type: application/json');
+        echo json_encode([
+            'status' => 'success', 
+            'cart_count' => $cart_count, 
+            'message' => 'Đã thêm vào giỏ hàng!'
+        ]);
+        exit;
+    } 
+    
+    // Nếu không phải AJAX (người dùng tắt JS), chuyển hướng về trang giỏ hàng
+    header('Location: /WebBanGiay/Cart');
+    exit;
+}
 
     public function checkout() {
         include 'app/views/product/checkout.php';

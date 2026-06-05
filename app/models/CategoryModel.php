@@ -1,4 +1,7 @@
 <?php
+require_once 'app/config/database.php';
+require_once 'app/models/CategoryModel.php';
+require_once 'app/helpers/SessionHelper.php';
 class CategoryModel
 {
     private $conn;
