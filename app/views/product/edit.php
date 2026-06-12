@@ -5,56 +5,34 @@
         <div class="col-lg-8 col-md-10">
             <div class="custom-card">
                 <div class="text-center mb-5">
-                    <h3 class="font-weight-bold text-uppercase" style="letter-spacing: 2px;">Sửa Thông Tin Giày</h3>
+                    <h3 class="font-weight-bold text-uppercase" style="letter-spacing: 2px;">Sửa Thông Tin (API)</h3>
                     <div style="height: 2px; width: 50px; background-color: #c89b3c; margin: 15px auto 0;"></div>
                 </div>
 
-                <form method="POST" action="/WebBanGiay/Product/update" enctype="multipart/form-data">
-                    <input type="hidden" name="id" value="<?= $product->id ?>">
+                <form id="edit-product-form">
+                    <input type="hidden" id="product_id" name="id" value="<?= $product->id ?>">
                     
                     <div class="form-group mb-4">
                         <label class="font-weight-bold text-uppercase small text-muted">Tên giày</label>
-                        <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($product->name) ?>" required>
+                        <input type="text" id="name" name="name" class="form-control" required>
                     </div>
-
                     <div class="form-group mb-4">
-                        <label class="font-weight-bold text-uppercase small text-muted">Mô tả chi tiết</label>
-                        <textarea name="description" class="form-control" rows="4" required><?= htmlspecialchars($product->description) ?></textarea>
+                        <label class="font-weight-bold text-uppercase small text-muted">Mô tả</label>
+                        <textarea id="description" name="description" class="form-control" rows="4" required></textarea>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 form-group mb-4">
-                            <label class="font-weight-bold text-uppercase small text-muted">Giá bán (VNĐ)</label>
-                            <input type="number" name="price" class="form-control" value="<?= $product->price ?>" required>
+                            <label class="font-weight-bold text-uppercase small text-muted">Giá</label>
+                            <input type="number" id="price" name="price" class="form-control" required>
                         </div>
                         <div class="col-md-6 form-group mb-4">
                             <label class="font-weight-bold text-uppercase small text-muted">Danh mục</label>
-                            <select name="category_id" class="form-control custom-select" required>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?= $cat->id ?>" <?= $cat->id == $product->category_id ? 'selected' : '' ?>><?= $cat->name ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <select id="category_id" name="category_id" class="form-control custom-select" required></select>
                         </div>
                     </div>
-
-                    <div class="form-group mb-5">
-                        <label class="font-weight-bold text-uppercase small text-muted d-block">Hình ảnh hiện tại</label>
-                        <?php if (!empty($product->image)): ?>
-                            <div class="mb-3 p-3 text-center" style="background: #f9f9f9; border: 1px solid #eee;">
-                                <img src="/WebBanGiay/public/uploads/<?= htmlspecialchars($product->image) ?>" style="height: 150px; object-fit: contain;">
-                            </div>
-                        <?php endif; ?>
-                        
-                        <label class="font-weight-bold text-uppercase small text-muted d-block mt-3">Chọn ảnh mới (nếu muốn thay đổi)</label>
-                        <div class="custom-file">
-                            <input type="file" name="image" class="custom-file-input" id="imageFile">
-                            <label class="custom-file-label rounded-0" for="imageFile">Chọn tệp ảnh...</label>
-                        </div>
-                    </div>
-
                     <div class="d-flex justify-content-between mt-4 border-top pt-4">
                         <a href="/WebBanGiay/Product" class="btn btn-outline-dark px-4 py-2">Quay lại</a>
-                        <button type="submit" class="btn btn-gold px-5 py-2">Cập Nhật</button>
+                        <button type="submit" class="btn btn-gold px-5 py-2">Cập Nhật bằng API</button>
                     </div>
                 </form>
             </div>
@@ -62,12 +40,56 @@
     </div>
 </div>
 
+<?php include 'app/views/shares/footer.php'; ?>
+
 <script>
-document.querySelector('.custom-file-input').addEventListener('change',function(e){
-  var fileName = document.getElementById("imageFile").files[0].name;
-  var nextSibling = e.target.nextElementSibling;
-  nextSibling.innerText = fileName;
+document.addEventListener("DOMContentLoaded", function() {
+    const productId = document.getElementById('product_id').value;
+
+    // Lấy dữ liệu sản phẩm hiện tại
+    fetch(`/WebBanGiay/api/product/${productId}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('name').value = data.name;
+            document.getElementById('description').value = data.description;
+            document.getElementById('price').value = data.price;
+            
+            // Lấy danh sách danh mục sau khi có data sản phẩm để set selected
+            fetch('/WebBanGiay/api/category')
+                .then(res => res.json())
+                .then(cats => {
+                    const catSelect = document.getElementById('category_id');
+                    cats.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.id;
+                        option.textContent = cat.name;
+                        if(cat.id == data.category_id) option.selected = true;
+                        catSelect.appendChild(option);
+                    });
+                });
+        });
+
+    // Cập nhật dữ liệu bằng PUT
+    document.getElementById('edit-product-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const jsonData = {};
+        formData.forEach((value, key) => { jsonData[key] = value; });
+
+        fetch(`/WebBanGiay/api/product/${productId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(jsonData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.message === 'Product updated successfully') {
+                alert('Cập nhật thành công!');
+                window.location.href = '/WebBanGiay/Product';
+            } else {
+                alert('Lỗi cập nhật');
+            }
+        });
+    });
 });
 </script>
-
-<?php include 'app/views/shares/footer.php'; ?>
