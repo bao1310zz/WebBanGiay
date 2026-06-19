@@ -1,7 +1,7 @@
 <?php
 class AccountModel {
     private $conn;
-    private $table_name = "account";
+    private $table_name = "account"; // CHUẨN RỒI! BẢNG CỦA CHÚNG TA TÊN LÀ ACCOUNT
 
     public function __construct($db) {
         $this->conn = $db;
@@ -33,12 +33,11 @@ class AccountModel {
         $address = htmlspecialchars(strip_tags($address));
         $role = htmlspecialchars(strip_tags($role));
         
-        // Mã hóa mật khẩu
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        // ĐÃ BỎ DÒNG PASSWORD_HASH Ở ĐÂY VÌ CONTROLLER ĐÃ MÃ HÓA RỒI
 
         $stmt->bindParam(":username", $username);
         $stmt->bindParam(":fullname", $fullName);
-        $stmt->bindParam(":password", $hashedPassword);
+        $stmt->bindParam(":password", $password); // Nhận trực tiếp password đã mã hóa từ Controller
         $stmt->bindParam(":email", $email);
         $stmt->bindParam(":phone", $phone);
         $stmt->bindParam(":address", $address);

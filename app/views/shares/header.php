@@ -275,18 +275,18 @@
                                     style="font-size: 10px; background: #333; color: #fff; border: 1px solid #c89b3c;"><?= SessionHelper::getRole() ?></small>
                             </span>
                         </li>
-                        <li class="nav-item">
-                            <a class="btn btn-outline-light btn-sm ml-2 px-3" href="/WebBanGiay/Account/logout"
+                        <li class="nav-item" id="nav-logout">
+                            <a class="btn btn-outline-light btn-sm ml-2 px-3" href="#" onclick="logout(); return false;"
                                 style="border-radius: 20px; border-color: #444; font-size: 12px; letter-spacing: 1px;">
                                 ĐĂNG XUẤT <i class="fas fa-sign-out-alt ml-1"></i>
                             </a>
                         </li>
                     <?php else: ?>
-                        <li class="nav-item">
+                        <li class="nav-item" id="nav-login">
                             <a class="nav-link text-uppercase font-weight-bold px-3" href="/WebBanGiay/Account/login"
                                 style="color: #c89b3c; letter-spacing: 1px;">Đăng nhập</a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" id="nav-register">
                             <a class="btn btn-gold btn-sm ml-2 px-3 font-weight-bold" href="/WebBanGiay/Account/register"
                                 style="background: #c89b3c; color: #111; border-radius: 20px; font-size: 12px;">
                                 ĐĂNG KÝ
@@ -297,3 +297,32 @@
             </div>
         </div>
     </nav>
+
+    <script>
+        // 1. Hàm Đăng xuất: Xóa Token trong localStorage và chuyển hướng đến trang xóa Session
+        function logout() {
+            localStorage.removeItem('jwtToken');
+            // Chuyển hướng tới đường dẫn logout của PHP để đảm bảo xóa luôn Session trên Server
+            location.href = '/WebBanGiay/Account/logout';
+        }
+
+        // 2. Lắng nghe sự kiện tải trang để kiểm tra Token theo chuẩn Slide
+        document.addEventListener("DOMContentLoaded", function() {
+            const token = localStorage.getItem('jwtToken');
+            const navLogin = document.getElementById('nav-login');
+            const navRegister = document.getElementById('nav-register');
+            const navLogout = document.getElementById('nav-logout');
+
+            // Do hệ thống của ta đang chạy PHP linh hoạt, JS chỉ cần kiểm tra xem Element có tồn tại trên DOM không
+            // để đổi trạng thái ẩn/hiện, tránh lỗi JS (trùng khớp với yêu cầu slide)
+            if (token) {
+                if (navLogin) navLogin.style.display = 'none';
+                if (navRegister) navRegister.style.display = 'none';
+                if (navLogout) navLogout.style.display = 'block';
+            } else {
+                if (navLogin) navLogin.style.display = 'block';
+                if (navRegister) navRegister.style.display = 'block';
+                if (navLogout) navLogout.style.display = 'none';
+            }
+        });
+    </script>

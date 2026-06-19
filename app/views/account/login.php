@@ -7,7 +7,7 @@
                 <div class="card bg-dark text-white shadow-lg border-0" style="border-radius: 1rem; background-color: #161616 !important;">
                     <div class="card-body p-5 text-center">
 
-                        <form action="/WebBanGiay/Account/checkLogin" method="post">
+                        <form id="login-form" action="/WebBanGiay/Account/checkLogin" method="post">
                             <h2 class="fw-bold mb-2 text-uppercase" style="color: #c89b3c; letter-spacing: 2px;">GENTLEMAN'S LOGIN</h2>
                             <p class="text-white-50 mb-5">Vui lòng đăng nhập để tiếp tục trải nghiệm</p>
 
@@ -42,3 +42,39 @@
 </section>
 
 <?php include 'app/views/shares/footer.php'; ?>
+
+<script>
+document.getElementById('login-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Chặn hành vi tải lại trang mặc định của form
+
+    const formData = new FormData(this);
+    const jsonData = {};
+    formData.forEach((value, key) => { 
+        jsonData[key] = value; 
+    });
+
+    // Gửi dữ liệu đi bằng Fetch API
+    fetch('/WebBanGiay/Account/checkLogin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.token) {
+            // Đăng nhập thành công -> Lưu Token vào bộ nhớ trình duyệt
+            localStorage.setItem('jwtToken', data.token);
+            // Chuyển hướng sang trang quản lý sản phẩm
+            location.href = '/WebBanGiay/Product';
+        } else {
+            alert('Đăng nhập thất bại: Vui lòng kiểm tra lại tài khoản hoặc mật khẩu!');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Lỗi kết nối đến hệ thống!');
+    });
+});
+</script>

@@ -104,6 +104,7 @@ class ProductController {
         $this->checkAdminAccess();
         if ($this->productModel->deleteProduct($id)) {
             header('Location: /WebBanGiay/Product');
+            exit();
         } else {
             echo "Lỗi khi xóa.";
         }

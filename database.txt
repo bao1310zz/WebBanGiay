@@ -41,6 +41,17 @@ CREATE TABLE orders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE account (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    fullname VARCHAR(255) NOT NULL,
+    email VARCHAR(100),
+    phone VARCHAR(20),
+    address TEXT,
+    role ENUM('user', 'admin') DEFAULT 'user'
+);
+
 -- ==========================================
 -- 4. TẠO BẢNG CHI TIẾT ĐƠN HÀNG (order_details)
 -- ==========================================
